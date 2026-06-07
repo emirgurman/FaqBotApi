@@ -104,3 +104,35 @@
             new() { Success = false, Message = message, Data = default };
     }
 }
+
+namespace FaqBotApi.Models
+{
+    /// <summary>
+    /// Yeni dil eklerken veya güncellerken kullanılan DTO.
+    /// </summary>
+    public class LanguageRequest
+    {
+        public string Code { get; set; } = string.Empty;   // tr, en, de
+        public string Name { get; set; } = string.Empty;   // Türkçe, English
+    }
+
+    /// <summary>
+    /// Yeni kategori eklerken veya güncellerken kullanılan DTO.
+    /// </summary>
+    public class CategoryRequest
+    {
+        public string Name { get; set; } = string.Empty;
+        public string? Description { get; set; }
+    }
+
+    /// <summary>
+    /// Kategori bazında FAQ sayısını dönen istatistik modeli.
+    /// Yönetim paneli istatistik ekranında kullanılır.
+    /// </summary>
+    public class CategoryStats
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public int FaqCount { get; set; }
+    }
+}

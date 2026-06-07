@@ -1,4 +1,5 @@
 ﻿using FaqBotApi.Data;
+using FaqBotApi.Middleware;
 using FaqBotApi.Services;
 using System.Reflection;
 
@@ -8,7 +9,6 @@ var builder = WebApplication.CreateBuilder(args);
 // SERVİSLER
 // ─────────────────────────────────────────────
 
-// Controller'ları kaydet
 builder.Services.AddControllers();
 
 // Swagger / OpenAPI — XML yorumlarıyla tam dokümantasyon
@@ -22,7 +22,6 @@ builder.Services.AddSwaggerGen(options =>
         Description = "Çok dilli FAQ Bot — ASP.NET Core 8 + Claude AI + MS SQL Server"
     });
 
-    // XML yorum dosyasını Swagger'a ekle
     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
     var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
     if (File.Exists(xmlPath))
@@ -45,8 +44,9 @@ builder.Services.AddCors(options =>
 builder.Services.AddSingleton<DatabaseHelper>();
 builder.Services.AddScoped<FaqService>();
 builder.Services.AddScoped<ClaudeService>();
+builder.Services.AddScoped<LanguageService>();
+builder.Services.AddScoped<CategoryService>();
 
-// Loglama
 builder.Services.AddLogging();
 
 var app = builder.Build();
@@ -55,16 +55,15 @@ var app = builder.Build();
 // MİDDLEWARE PIPELINE
 // ─────────────────────────────────────────────
 
-// Swagger sadece development ortamında açık
-if (app.Environment.IsDevelopment())
+// Global hata yakalayıcı — pipeline'ın en başına eklenir
+app.UseMiddleware<ExceptionMiddleware>();
+
+app.UseSwagger();
+app.UseSwaggerUI(options =>
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "FAQ Bot API v1");
-        options.RoutePrefix = string.Empty; // Ana sayfada Swagger açılır
-    });
-}
+    options.SwaggerEndpoint("/swagger/v1/swagger.json", "FAQ Bot API v1");
+    options.RoutePrefix = "swagger";
+});
 
 app.UseHttpsRedirection();
 app.UseCors("AllowStreamlit");
